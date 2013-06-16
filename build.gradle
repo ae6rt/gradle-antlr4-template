@@ -8,7 +8,7 @@ ext.versions = [
 ]
 
 ext.antlr = [
-        grammarpackage: "org/carpediem",
+        grammarpackage: "org.carpediem",
         antlrSource: 'src/main/antlr',
         destinationDir: "src/generated-sources/java"
 ]
@@ -69,8 +69,9 @@ task generateGrammarSource(dependsOn: antlrOutputDir, type: JavaExec) {
 
     main = 'org.antlr.v4.Tool'
     classpath = configurations.antlr4
-    def pkg = antlr.grammarpackage.replaceAll("/", ".")
-    args = ["-o", "${antlr.destinationDir}/${antlr.grammarpackage}", "-package", pkg, grammars.files].flatten()
+    def pkg = antlr.grammarpackage.replaceAll("\\.", "/")
+    println("pkg: " + pkg)
+    args = ["-o", "${antlr.destinationDir}/${pkg}", "-package", antlr.grammarpackage, grammars.files].flatten()
 
 }
 
