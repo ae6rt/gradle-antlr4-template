@@ -1,3 +1,4 @@
+description = "ANTLR4 project template"
 apply plugin: 'java'
 apply from: file('gradle/idea.gradle')
 
@@ -18,14 +19,16 @@ repositories {
 }
 
 configurations {
-    antlr4
+    antlr4 {
+        description = "ANTLR4"
+    }
 }
 
 dependencies {
     compile group: "org.slf4j", name: "slf4j-api", version: versions.slf4j
     compile group: "ch.qos.logback", name: "logback-classic", version: versions.logback
-    compile 'org.antlr:antlr4-runtime:4.0'
-    antlr4 'org.antlr:antlr4:4.0'
+    compile group: "org.antlr", name: "antlr4-runtime", version: "4.0"
+    antlr4 group: "org.antlr", name: "antlr4", version: "4.0"
     testCompile group: "junit", name: "junit", version: versions.junit
 }
 
@@ -40,19 +43,6 @@ tasks.withType(Compile) {
 tasks.withType(Test) {
     systemProperties = System.getProperties()
     testLogging.showStandardStreams = true
-}
-
-sourceSets {
-    intTest {
-        compileClasspath = sourceSets.main.output + configurations.testRuntime
-        runtimeClasspath = output + sourceSets.main.output + configurations.testRuntime
-    }
-}
-
-task intTest(type: Test) {
-    testClassesDir = sourceSets.intTest.output.classesDir
-    classpath = sourceSets.intTest.runtimeClasspath
-    outputs.upToDateWhen { false }
 }
 
 task antlrOutputDir << {
@@ -70,8 +60,7 @@ task generateGrammarSource(dependsOn: antlrOutputDir, type: JavaExec) {
     main = 'org.antlr.v4.Tool'
     classpath = configurations.antlr4
     def pkg = antlr.grammarpackage.replaceAll("\\.", "/")
-    println("pkg: " + pkg)
-    args = ["-o", "${antlr.destinationDir}/${pkg}", "-package", antlr.grammarpackage, grammars.files].flatten()
+    args = ["-o", "${antlr.destinationDir}/${pkg}", "-atn", "-visitor", "-package", antlr.grammarpackage, grammars.files].flatten()
 
 }
 

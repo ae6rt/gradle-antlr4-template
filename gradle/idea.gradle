@@ -3,7 +3,5 @@ apply plugin: 'idea'
 idea {
     module {
         sourceDirs += file('src/generated-sources/java')
-        testSourceDirs += file('src/intTest/java')
-        testSourceDirs += file('src/intTest/resources')
     }
 }
