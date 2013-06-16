@@ -1,0 +1,84 @@
+apply plugin: 'java'
+apply from: file('gradle/idea.gradle')
+
+ext.versions = [
+        slf4j: "1.7.2",
+        logback: "1.0.9",
+        junit: "4.10"
+]
+
+ext.antlr = [
+        grammarpackage: "org/carpediem",
+        antlrSource: 'src/main/antlr',
+        destinationDir: "src/generated-sources/java"
+]
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    antlr4
+}
+
+dependencies {
+    compile group: "org.slf4j", name: "slf4j-api", version: versions.slf4j
+    compile group: "ch.qos.logback", name: "logback-classic", version: versions.logback
+    compile 'org.antlr:antlr4-runtime:4.0'
+    antlr4 'org.antlr:antlr4:4.0'
+    testCompile group: "junit", name: "junit", version: versions.junit
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.6'
+}
+
+tasks.withType(Compile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test) {
+    systemProperties = System.getProperties()
+    testLogging.showStandardStreams = true
+}
+
+sourceSets {
+    intTest {
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath = output + sourceSets.main.output + configurations.testRuntime
+    }
+}
+
+task intTest(type: Test) {
+    testClassesDir = sourceSets.intTest.output.classesDir
+    classpath = sourceSets.intTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+}
+
+task antlrOutputDir << {
+    mkdir(antlr.destinationDir)
+}
+
+task generateGrammarSource(dependsOn: antlrOutputDir, type: JavaExec) {
+    description = 'Generates Java sources from ANTLR4 grammars.'
+
+    inputs.dir file(antlr.antlrSource)
+    outputs.dir file(antlr.destinationDir)
+
+    def grammars = fileTree(antlr.antlrSource).include('**/*.g4')
+
+    main = 'org.antlr.v4.Tool'
+    classpath = configurations.antlr4
+    def pkg = antlr.grammarpackage.replaceAll("/", ".")
+    args = ["-o", "${antlr.destinationDir}/${antlr.grammarpackage}", "-package", pkg, grammars.files].flatten()
+
+}
+
+compileJava {
+    dependsOn generateGrammarSource
+    source antlr.destinationDir
+}
+
+clean {
+    delete antlr.destinationDir
+}
