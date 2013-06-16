@@ -60,7 +60,7 @@ task generateGrammarSource(dependsOn: antlrOutputDir, type: JavaExec) {
     main = 'org.antlr.v4.Tool'
     classpath = configurations.antlr4
     def pkg = antlr.grammarpackage.replaceAll("\\.", "/")
-    args = ["-o", "${antlr.destinationDir}/${pkg}", "-atn", "-visitor", "-package", antlr.grammarpackage, grammars.files].flatten()
+    args = ["-o", "${antlr.destinationDir}/${pkg}"/*, "-atn"*/, "-visitor", "-package", antlr.grammarpackage, grammars.files].flatten()
 
 }
 
