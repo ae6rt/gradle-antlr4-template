@@ -1,6 +1,9 @@
 description = "ANTLR4 project template"
 apply plugin: 'java'
+apply plugin: 'application'
 apply from: file('gradle/idea.gradle')
+
+mainClassName = "org.petrovic.ptl.App"
 
 ext.versions = [
         slf4j: "1.7.2",
